@@ -1,0 +1,28 @@
+site_name: hazardserve
+site_description: Hazard-aware placement and pre-emptive migration for stateful LLM inference on unreliable nodes
+repo_url: https://github.com/lvlrSajjad/hazardserve
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep orange
+      toggle: { icon: material/brightness-7, name: Dark mode }
+    - scheme: slate
+      primary: deep orange
+      toggle: { icon: material/brightness-4, name: Light mode }
+  features: [navigation.sections, content.code.copy]
+markdown_extensions:
+  - admonition
+  - pymdownx.arithmatex: { generic: true }
+  - pymdownx.superfences
+  - tables
+extra_javascript:
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+nav:
+  - Home: index.md
+  - The problem: problem.md
+  - The algorithm: algorithm.md
+  - Prior art & novelty: related-work.md
+  - Evaluation plan: evaluation.md
+  - Roadmap & phases: roadmap.md
+  - Contributing: contributing.md

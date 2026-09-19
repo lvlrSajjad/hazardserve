@@ -1,0 +1,8 @@
+{
+  "title": "hazardserve: hazard-aware placement and pre-emptive migration for stateful LLM inference on unreliable nodes",
+  "upload_type": "software",
+  "license": "Apache-2.0",
+  "creators": [{ "name": "<Surname>, <Given name>" }],
+  "keywords": ["LLM serving", "spot instances", "volunteer computing", "survival analysis", "KV cache migration"],
+  "access_right": "open"
+}

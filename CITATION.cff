@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use hazardserve, please cite it as below."
+title: "hazardserve: hazard-aware placement and pre-emptive migration for stateful LLM inference on unreliable nodes"
+type: software
+version: 0.1.0
+date-released: 2026-09-19
+license: Apache-2.0
+repository-code: "https://github.com/lvlrSajjad/hazardserve"
+authors:
+  - family-names: "<Your surname>"
+    given-names: "<Your given name>"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+keywords: [llm-serving, spot-instances, volunteer-computing, survival-analysis, kv-cache, migration]

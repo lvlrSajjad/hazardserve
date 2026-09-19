@@ -1,0 +1,26 @@
+{
+  "reactive_fastest": {
+    "mean_latency_s": 87.95930042579937,
+    "p99_latency_s": 466.43666666666667,
+    "unplanned_migrations": 77.33333333333333,
+    "planned_migrations": 0.0,
+    "wasted_seconds": 586.3333333333334,
+    "completed": 709.3333333333334
+  },
+  "hazard_aware": {
+    "mean_latency_s": 82.8352872246206,
+    "p99_latency_s": 466.04666666666645,
+    "unplanned_migrations": 74.33333333333333,
+    "planned_migrations": 10.0,
+    "wasted_seconds": 691.3000000000001,
+    "completed": 709.3333333333334
+  },
+  "oracle": {
+    "mean_latency_s": 87.77655679910981,
+    "p99_latency_s": 513.97,
+    "unplanned_migrations": 32.666666666666664,
+    "planned_migrations": 0.0,
+    "wasted_seconds": 253.73333333333335,
+    "completed": 708.3333333333334
+  }
+}
