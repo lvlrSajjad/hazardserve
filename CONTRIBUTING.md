@@ -13,9 +13,11 @@ The project is small on purpose: one problem, one cost function, one policy, one
 |---|---|
 | `src/hazardserve/hazard.py` | Survival estimation (Kaplan-Meier + conditional survival) |
 | `src/hazardserve/cost.py` | Time and migration cost models |
+| `src/hazardserve/crossover.py` | Transfer-vs-recompute crossover |
 | `src/hazardserve/policy.py` | The algorithm + baselines |
 | `src/hazardserve/simulator.py` | Churn-driven discrete-time simulator |
 | `examples/` | Runnable experiments |
+| `notebooks/` | Derivations that back the design note |
 | `docs/` | GitHub Pages (MkDocs Material) |
 | `paper/` | Paper source and figures |
 | `PLAN.md` | Phases, milestones, pivot thresholds |

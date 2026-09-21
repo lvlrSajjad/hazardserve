@@ -23,6 +23,8 @@ Cross one **availability** trace with one **workload** trace. See `traces/README
 
 Hazard estimator family (KM / Weibull / hierarchical / boosted with features) × migration trigger parameters × output-length estimate noise × workload mix.
 
+One caveat on the trigger axis: on a WAN-class hop the trigger's conditions fail on the *cost of moving*, not on the threshold, so sweeping the hysteresis there measures nothing (see [the algorithm](algorithm.md) and design note §8). The sweep only has signal where a planned move can be cheaper than a re-prefill — fast links, long contexts — so the ablation must vary bandwidth and context length alongside the trigger parameters, or it will report a flat line and call it robustness.
+
 ## Simulator validation
 
 Record real churn on a small spot cluster and a few consumer machines (Phase 4), replay it through the simulator, and publish the fidelity plot. Prior art did the same on 12× g4dn (SpotServe) and g6/g6e (ShuntServe).
