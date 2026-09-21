@@ -40,9 +40,18 @@ Migrate to the best $j$ iff $\text{risk\_gain} > h$ **and** $\Delta T < h$, with
 !!! tip "Why hazard-motivated only"
     An earlier version migrated whenever $E_j + C < E_i$. That turns the migration path into a load balancer with noisy inputs and it thrashed. Restricting the trigger to *risk removal* keeps migrations rare and makes each one attributable to the hazard model, which is the claim we want to test.
 
+!!! warning "The trigger rarely fires, and not because of the hysteresis"
+    `notebooks/derive-trigger.ipynb` prints both conditions per uptime on a two-node WAN hop: $\text{risk\_gain}$ is *negative at every uptime*, because $C_{\text{planned}}$ is a full re-prefill (≈ 18 s at 4.5 k tokens, 250 tok/s) and exceeds $L_i$ outright. Raising or lowering $h$ changes nothing. Either pre-emptive migration pays only in a narrow regime, or $C$ is too pessimistic because the destination can prefill while the source keeps decoding. Open question in design note §8.
+
 ## Decision 3: how to migrate
 
-$C_{\text{planned}} = \min(\text{KV transfer}, \text{recompute})$. Over WAN-class bandwidth recompute almost always wins; over NVLink/RDMA transfer wins for long contexts. The crossover is a hardware measurement (Phase 4), not a modelling choice.
+$C_{\text{planned}} = \min(\text{KV transfer}, \text{recompute})$. Both are affine in the context length, so they cross at most once, at
+
+$$
+c^\star = \frac{O_t - O_r}{\dfrac{1}{p_j} - \dfrac{\text{kv\_bytes}}{\min(B_i, B_j)}}
+$$
+
+— infinite, meaning transfer never wins, whenever the link is slower per token than the destination's prefill engine. Over WAN-class bandwidth that is the normal case; over NVLink/RDMA transfer wins beyond roughly a thousand tokens. See [transfer vs recompute](crossover.md) for the table and for the second axis prior work tends to omit: the crossover moves with the destination's *prefill rate* as much as with bandwidth. The constants are a hardware measurement (Phase 4), not a modelling choice.
 
 ## Reference
 

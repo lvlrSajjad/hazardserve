@@ -26,7 +26,7 @@ One function, two decisions:
 |---|---|
 | **Place** new request | `argmin_i E_i(r)` over feasible nodes |
 | **Pre-emptively migrate** running request *i → j* | move iff the risk removed pays for the move and the request does not get materially slower: `L_i − (C_planned(i→j) + L_j) > h` and `(T_j + C_planned) − T_i < h` |
-| **How** to migrate | `C_planned = min(KV transfer, recompute-from-tokens)`; when the source is already gone only recompute is possible |
+| **How** to migrate | `C_planned = min(KV transfer, recompute-from-tokens)`; when the source is already gone only recompute is possible. The crossover between the two is modelled in [`docs/crossover.md`](docs/crossover.md) |
 
 Because the same *E* drives both decisions, the policy never migrates into a node it would not have placed on, and it migrates *early*, while the source is still alive and cheap KV transfer is an option.
 
@@ -62,7 +62,9 @@ Three seeds, 2 simulated hours, warm-up excluded. Policies see identical churn a
 | **hazard_aware** | 82.8 | 466.0 | 74.3 | 10.0 | 691.3 |
 | oracle | 87.8 | 514.0 | 32.7 | 0 | 253.7 |
 
-What this says, honestly: the v0 placement rule already reduces unplanned failures and waste versus the reactive baseline at equal latency, and the oracle shows there is a further 2× reduction available to better prediction. The pre-emptive migration trigger is conservative and barely fires; tuning it is Phase 1 work. None of this is a claim until it runs on real traces (Phase 2).
+What this says, honestly: the v0 placement rule already reduces unplanned failures and waste versus the reactive baseline at equal latency, and the oracle shows there is a further 2× reduction available to better prediction. None of this is a claim until it runs on real traces (Phase 2).
+
+The pre-emptive migration trigger barely fires, and Phase 0 found out why — it is structural, not a matter of tuning. A planned move costs a full re-prefill of the context on the destination (≈ 18 s at 4.5 k tokens over a WAN-class link), which is larger than the risk *L* it removes, so the trigger's first condition fails before the hysteresis is ever consulted; the same cost then fails the second. Either pre-emptive migration only pays in a characterisable regime — fast link, long request, late in a node's life — or the cost is mis-specified, because the destination can prefill while the source keeps decoding. [`notebooks/derive-trigger.ipynb`](notebooks/derive-trigger.ipynb) prints both conditions per uptime; [`paper/design-note.md`](paper/design-note.md) §3 and §8 carry the question.
 
 ## What is new here
 
