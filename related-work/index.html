@@ -1,0 +1,930 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Hazard-aware placement and pre-emptive migration for stateful LLM inference on unreliable nodes">
+      
+      
+      
+      
+        <link rel="prev" href="../crossover/">
+      
+      
+        <link rel="next" href="../sweep-log/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Prior art & novelty - hazardserve</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#prior-art-and-novelty" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="hazardserve" class="md-header__button md-logo" aria-label="hazardserve" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            hazardserve
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Prior art & novelty
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/lvlrSajjad/hazardserve" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="hazardserve" class="md-nav__button md-logo" aria-label="hazardserve" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    hazardserve
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/lvlrSajjad/hazardserve" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../problem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The problem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../algorithm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The algorithm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../crossover/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transfer vs recompute
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prior art & novelty
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prior art & novelty
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verdict
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scorecard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scorecard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-we-must-differentiate-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What we must differentiate against
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#borrowable-prediction-literature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Borrowable prediction literature
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#host-systems-for-the-reference-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host systems for the reference implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-adoption-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The adoption model
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sweep-log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    arXiv sweep log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap & phases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verdict
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scorecard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scorecard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-we-must-differentiate-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What we must differentiate against
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#borrowable-prediction-literature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Borrowable prediction literature
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#host-systems-for-the-reference-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host systems for the reference implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-adoption-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The adoption model
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="prior-art-and-novelty">Prior art and novelty</h1>
+<p>Status as of September 2026. Re-run an arXiv sweep before freezing the paper's related-work section; several entries below are 2026 preprints and the area is moving fast.</p>
+<h2 id="verdict">Verdict</h2>
+<p>No published system combines all three of:</p>
+<ol>
+<li>a <strong>predictive per-node survival/hazard model</strong> estimated from that node's session history and conditioned on current uptime;</li>
+<li>a <strong>single expected-completion-cost function</strong> driving both new-request placement and pre-emptive migration of running stateful requests <em>while the source is still alive</em>;</li>
+<li>an explicit <strong>KV-transfer vs recompute-from-tokens</strong> choice per migration.</li>
+</ol>
+<p>The three ingredients exist separately. The nearest neighbours each hold roughly two.</p>
+<h2 id="scorecard">Scorecard</h2>
+<table>
+<thead>
+<tr>
+<th>Work</th>
+<th>(1) per-node hazard</th>
+<th>(2) unified placement + pre-emptive migration</th>
+<th>(3) transfer vs recompute</th>
+<th>Domain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SpotServe, ASPLOS'24, arXiv 2311.15566</td>
+<td>no; lists "instance availability prediction" as future work</td>
+<td>no; reactive migration + stateful recovery in the grace period</td>
+<td>recompute-oriented recovery</td>
+<td>LLM on preemptible instances</td>
+</tr>
+<tr>
+<td>ShuntServe, 2026, arXiv 2606.18600</td>
+<td>no</td>
+<td>no; reactive + on-demand fallback</td>
+<td>measured both on g6/g6e; per-request hybrid selection named as future work</td>
+<td>heterogeneous spot clusters</td>
+</tr>
+<tr>
+<td>SkyServe (SpotHedge), EuroSys'25, arXiv 2411.01438</td>
+<td>no; replica-level hedging across failure domains</td>
+<td>no; provisioning + abort/retry</td>
+<td>no (aborts and re-sends)</td>
+<td>online serving</td>
+</tr>
+<tr>
+<td>SkyNomad, 2026, arXiv 2601.06520</td>
+<td><strong>yes</strong>: survival on instance age, hazard rate, conditional remaining lifetime</td>
+<td>partial: unified monetary + migration cost, but batch jobs, no request-level migration</td>
+<td>no</td>
+<td>AI <strong>batch</strong> jobs</td>
+</tr>
+<tr>
+<td>Pallas, 2026, arXiv 2608.16477</td>
+<td>no; mobility/handover prediction</td>
+<td>no; migration only</td>
+<td><strong>yes</strong>: prefix prefill + suffix KV stream</td>
+<td>AI-RAN LLM under mobility</td>
+</tr>
+<tr>
+<td>ctHO, 2026, arXiv 2603.28018</td>
+<td>no</td>
+<td>no; migration only, single delay objective</td>
+<td><strong>yes</strong>: joint prefill amount and KV backhaul rate</td>
+<td>edge LLM handover (simulation only)</td>
+</tr>
+<tr>
+<td>Llumnix, OSDI'24, arXiv 2406.03243</td>
+<td>no</td>
+<td>no; reactive live migration for load balance / de-frag / priority</td>
+<td>KV transfer (append-only pipelining)</td>
+<td>multi-instance vLLM</td>
+</tr>
+<tr>
+<td>ServerlessLLM, OSDI'24, arXiv 2401.14351</td>
+<td>no</td>
+<td>no</td>
+<td>token-based migration; recompute at destination</td>
+<td>serverless inference</td>
+</tr>
+<tr>
+<td>DéjàVu, ICML'24</td>
+<td>no</td>
+<td>no; KV streaming replication for fault tolerance</td>
+<td>KV streaming</td>
+<td>disaggregated serving</td>
+</tr>
+<tr>
+<td>ConServe, ICML'26, arXiv 2410.01228</td>
+<td>no</td>
+<td>no; preemption-tolerant harvesting</td>
+<td>per-token incremental KV checkpoint to host</td>
+<td>GPU harvesting</td>
+</tr>
+<tr>
+<td>Petals, ACL'23, arXiv 2209.01188</td>
+<td>no</td>
+<td>no; DHT rebalancing, reroute after disconnect</td>
+<td>recompute</td>
+<td>volunteer / internet-scale</td>
+</tr>
+<tr>
+<td>Parallax (Gradient), 2025, arXiv 2509.26182</td>
+<td>no; selects on availability, compute, latency at request time</td>
+<td>no</td>
+<td>–</td>
+<td>decentralized heterogeneous nodes</td>
+</tr>
+<tr>
+<td>Helix, ASPLOS'25, arXiv 2406.01566; HexGen, ICML'24</td>
+<td>no; static heterogeneous placement</td>
+<td>no</td>
+<td>–</td>
+<td>heterogeneous / geo-distributed</td>
+</tr>
+<tr>
+<td>Bamboo NSDI'23, Parcae NSDI'24, Oobleck SOSP'23</td>
+<td>some proactive redundancy</td>
+<td>–</td>
+<td>–</td>
+<td>spot <strong>training</strong>, not stateful serving</td>
+</tr>
+<tr>
+<td>Mooncake, DistServe OSDI'24, Splitwise ISCA'24, llm-d P2P KV</td>
+<td>–</td>
+<td>–</td>
+<td>transport substrate we reuse</td>
+<td>disaggregated serving</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-we-must-differentiate-against">What we must differentiate against</h2>
+<ul>
+<li><strong>SpotServe / ShuntServe:</strong> we are predictive and unify placement with migration; ShuntServe's own future-work paragraph describes our per-request transfer-vs-recompute decision.</li>
+<li><strong>SkyNomad:</strong> we target stateful interactive decoding with request-level KV migration; we learn the hazard per node from session history rather than region-level lifetime for batch jobs.</li>
+<li><strong>Pallas / ctHO:</strong> our trigger is a per-node survival hazard, not a mobility prediction, and we cover placement, not just the handover.</li>
+<li><strong>Llumnix:</strong> we reuse its migration mechanism; our contribution is <em>when</em> and <em>where</em>, driven by hazard.</li>
+</ul>
+<h2 id="borrowable-prediction-literature">Borrowable prediction literature</h2>
+<ul>
+<li>Desktop grids / volunteer computing: Javadi, Kondo, Vincent, Anderson, "Discovering statistical models of availability in large distributed systems: an empirical study of SETI@home," IEEE TPDS 22(11), 2011; Kondo, Andrzejak, Anderson, "On correlated availability in Internet-distributed systems," Grid 2008; Heien, Kondo, Anderson, IEEE TPDS 23(6), 2012. Weibull / hyperexponential fits and semi-Markov host models are direct precedent for per-node survival estimation.</li>
+<li>Spot interruption prediction: SpotLake (IISWC'22, arXiv 2202.02973) archives AWS placement scores and interruption ratios and shows Kaplan-Meier lifetime curves; Cast AI and Spot by NetApp productise survival-style rebalancing (NetApp patent US11915053B2 describes gradient-boosted trees).</li>
+<li>Failure Trace Archive: Javadi, Kondo, Iosup, Epema, JPDC 73(8), 2013.</li>
+</ul>
+<h2 id="host-systems-for-the-reference-implementation">Host systems for the reference implementation</h2>
+<ul>
+<li><strong>llm-d Inference Scheduler</strong> (Gateway API Inference Extension Endpoint Picker): Filter → Score → Pick pipeline with YAML-configured scorer plugins; adding a scorer needs no core changes. Best home for the placement rule.</li>
+<li><strong>vLLM KV-connector API</strong> (<code>kv_transfer/kv_connector/v1</code>, LMCache and NIXL connectors, dynamic loading, layer-wise async save/load): where transfer-vs-recompute is actually executed.</li>
+<li><strong>Llumnix</strong> for a migration-heavy prototype; <strong>Parallax / Petals</strong> for the volunteer demo; SGLang, Ray Serve LLM, Dynamo, SkyPilot as secondary targets.</li>
+</ul>
+<h2 id="the-adoption-model">The adoption model</h2>
+<p>Kazemi &amp; Sullivan, "One Millisecond Face Alignment with an Ensemble of Regression Trees," CVPR 2014 (DOI 10.1109/CVPR.2014.241), became a standard because the method was simple, fast, and shipped as a reference implementation in dlib (Davis King), later wrapped by OpenCV. The paper alone did not do it; the drop-in implementation did. Hence Phase 3.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
