@@ -19,6 +19,8 @@ jobs:
       - run: pytest -q
       - name: Smoke-run the policy comparison (short)
         run: python examples/compare_policies.py --seeds 1 --hours 0.5
+      - name: Render the paper figure
+        run: python examples/plot_cost_decomposition.py --out /tmp/cost-decomposition.png
   cff:
     runs-on: ubuntu-latest
     steps:

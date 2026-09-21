@@ -1,10 +1,17 @@
 # Design note — Phase 0
 
-> **Status: skeleton.** Every section below is a Phase 0 deliverable from [`PLAN.md`](../PLAN.md).
+> **Status: skeleton, scaffolded.** Every section below is a Phase 0 deliverable from [`PLAN.md`](../PLAN.md).
 > Target length 6–8 pages. When a section is done, tick the matching box in `PLAN.md`.
 > Sections 2 and 3 are largely drafted already in `docs/problem.md` and `docs/algorithm.md` —
-> this note tightens them into reviewer-proof prose and adds the parts that live nowhere yet
-> (§4 crossover model, §5 differentiation freeze, §6 the one figure).
+> this note tightens them into reviewer-proof prose. The prose is what is missing; each remaining
+> section now has a runnable artifact behind it:
+>
+> | § | Artifact | State |
+> |---|---|---|
+> | 3 | [`notebooks/derive-trigger.ipynb`](../notebooks/derive-trigger.ipynb) | runs; derivations are TODO, numerical checks are live |
+> | 4 | [`src/hazardserve/crossover.py`](../src/hazardserve/crossover.py), [`docs/crossover.md`](../docs/crossover.md) | model written, constants assumed |
+> | 5 | [`docs/sweep-log.md`](../docs/sweep-log.md) | log created, sweep not yet run |
+> | 6 | [`examples/plot_cost_decomposition.py`](../examples/plot_cost_decomposition.py) | figure renders; candidate, not chosen |
 
 ---
 
@@ -37,44 +44,69 @@ _Source: `docs/algorithm.md`._ Derive $E_i(r) = T_i + L_i$ rather than assert it
       `docs/algorithm.md`), and what is the cost of setting it too high (the v0 trigger barely
       fires — see the volunteer-fleet numbers in the README).
 - [ ] Complexity and decision latency: $O(\text{nodes} \times \text{cells})$, 16-cell Riemann sum.
+- [ ] **Explain why the trigger does not fire.** `notebooks/derive-trigger.ipynb` §3 prints the two
+      conditions per uptime, and `risk_gain` is *negative at every uptime* in the WAN two-node case:
+      the planned-migration cost $C$ is a full re-prefill of the context (≈ 18 s at 4.5 k tokens and
+      250 tok/s), which exceeds $L_i$ before the hysteresis is even consulted, and the same $C$ then
+      fails the $\Delta T < h$ test. Either pre-emptive migration pays only in a characterisable
+      regime (fast link, long request, late in a node's life) — in which case say so and characterise
+      it — or $C$ is mis-specified because the destination can prefill while the source keeps
+      decoding. **This is the most consequential open question in Phase 0** and it decides whether
+      the paper's second decision survives.
 
-**Companion artifact:** notebook deriving the trigger (Phase 0 exit criterion, not yet written).
+**Companion artifact:** [`notebooks/derive-trigger.ipynb`](../notebooks/derive-trigger.ipynb) —
+skeleton, runs end to end. Already established there: the 16-cell Riemann sum matches a
+200 k-draw Monte Carlo of the same integral to < 0.5 %, and cells beyond 32 buy nothing, so the
+production integral is not the approximation to worry about.
 
 ## 4. Transfer-vs-recompute crossover model
 
-_To write. Nothing on this exists in the repo yet._
+_Source: [`docs/crossover.md`](../docs/crossover.md) and `src/hazardserve/crossover.py` (both new).
+The model is written; the prose and the citations are not._
 
-- [ ] Start from ShuntServe's measurement: recompute wins except for very long contexts.
+- [x] Crossover written as a function of context length, bandwidth **and** prefill rate:
+      $c^\star = (O_t - O_r) / (1/p_j - \text{kv\_bytes}/\min(B_i,B_j))$, with $\infty$ when the
+      denominator is non-positive. Pinned to `MigrationCost` by `tests/test_crossover.py`.
+- [x] Constants carry their provenance in `LINK_CLASSES` and every one is marked *assumed*.
+- [ ] Start from ShuntServe's measurement: recompute wins except for very long contexts — cite it
+      against the table in `docs/crossover.md` and say where the two disagree.
 - [ ] Cross-check against ServerlessLLM's token-migration argument.
-- [ ] Write the crossover as a function of context length, bandwidth and prefill rate; state the
-      context length at which transfer wins for WAN, LAN and NVLink/RDMA classes.
-- [ ] Flag clearly that the constants are a Phase 4 hardware measurement, not a modelling choice
-      (`docs/algorithm.md` already says this — keep that honesty in the paper).
+- [ ] Make the second axis a claim, not a footnote: the crossover moves with the destination's
+      prefill rate as much as with bandwidth (1 300 tokens at 3 000 tok/s vs 80 at 250 tok/s over the
+      same LAN). Prior work states it against context length alone.
 
 ## 5. Differentiation table — frozen
 
-_Source: `docs/related-work.md` and the README table._ Freeze after a fresh sweep.
+_Source: `docs/related-work.md` and the README table. Sweeps are recorded in
+[`docs/sweep-log.md`](../docs/sweep-log.md), which is where the freeze becomes auditable._
 
-- [ ] Re-run an arXiv sweep for late-2026 preprints **before** freezing (cs.DC, cs.LG).
+- [ ] Re-run an arXiv sweep for late-2026 preprints **before** freezing (cs.DC, cs.LG); queries and
+      the null results are listed in the sweep log.
 - [ ] Verify every arXiv ID in `paper/references.bib` — several are 2026 preprints.
 - [ ] Columns stay: per-node survival hazard | one cost for placement *and* pre-emptive migration |
       KV-transfer vs recompute choice.
 - [ ] Rows: SpotServe, ShuntServe, SkyServe, SkyNomad, Pallas, ctHO, Llumnix, Petals/Parallax.
 - [ ] For each row, one sentence naming the exact thing it does *not* do. No vague "unlike prior work".
-- [ ] Record the sweep date here so the freeze is auditable.
+- [ ] Add the sweep row to `docs/sweep-log.md` and reference its date here.
 
 **Pivot check:** if a preprint already ships hazard + unified placement/migration + transfer-vs-recompute,
 trigger the PLAN.md Phase 5 pivot now rather than in Phase 3.
 
 ## 6. The one figure
 
-_To write._ Candidate (from `paper/README.md`): the cost decomposition $E = T + L$ over time on a
-decreasing-hazard laptop vs an increasing-hazard spot instance, showing why the same request should
-be placed differently.
+_Candidate drawn: `python examples/plot_cost_decomposition.py` → `paper/figures/cost-decomposition.png`.
+Two identical nodes, identical request; only the hazard shape differs._
 
-- [ ] Decide: is this the figure, or does something else carry the paper better?
-- [ ] Sketch it by hand first; only then write the generating script.
-- [ ] It must be readable with no caption and no colour.
+- [x] Generating script exists, greyscale and linestyle only, no colour needed.
+- [ ] **Decide: is this the figure?** Drawing it surfaced a problem. At realistic parameters $L$ is
+      only 1–10 % of $E$, so the honest single-panel version shows two nearly flat lines. The script
+      currently splits into two panels (E on the true scale, then $L$ alone, where the two archetypes
+      cross at ~11 minutes of uptime). A two-panel figure whose left half looks like nothing is a
+      weak candidate — either argue that the small ratio *is* the story (single-digit-% gains are
+      what the pivot threshold in `PLAN.md` also expects), or find a figure that carries more.
+- [ ] Re-cut from trace data in Phase 2. Today's session lengths are synthetic Weibulls, so the
+      figure illustrates the model; it is not evidence.
+- [ ] Caption must state that both nodes have identical speed, or the reader will credit hardware.
 
 ## 7. Scope and non-goals
 
@@ -82,12 +114,24 @@ _Source: `docs/problem.md` non-goals._ Restate so §1's claim cannot be read wid
 
 ## 8. Open questions carried into Phase 1
 
-_To write._ Anything §2–§6 could not settle. Phase 1 starts by closing these.
+_To write._ Anything §2–§6 could not settle. Phase 1 starts by closing these. Already on the list:
+
+- [ ] Is the planned-migration cost $C$ mis-specified? (§3 — decides whether the migration decision
+      survives at all.)
+- [ ] Is one-loss truncation defensible — the model charges at most one unplanned loss per request,
+      but at high churn the fallback node can die too.
+- [ ] Does Kaplan-Meier's independent-censoring assumption survive a scheduler that steers work
+      toward long-lived nodes and therefore observes them differently?
+- [ ] Which of $h$, `check_interval`, `min_remaining` actually moves the headline number?
+- [ ] Does the one figure carry the paper, or is $L/E \approx 1\text{–}10\,\%$ too small to show? (§6)
 
 ---
 
 ### Phase 0 exit checklist
 
 - [ ] This note at 6–8 pages, every box above ticked
-- [ ] Notebook deriving the migration trigger
+- [ ] Notebook deriving the migration trigger — *skeleton exists and runs; the derivations in §2–§4
+      of the notebook are still TODO*
+- [ ] Differentiation table frozen, with a sweep row in `docs/sweep-log.md`
+- [ ] The one figure chosen (not merely drawn)
 - [ ] `PLAN.md` Phase 0 boxes ticked to match

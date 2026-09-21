@@ -83,11 +83,12 @@ Full comparison and citations: [`docs/related-work.md`](docs/related-work.md).
 ## Layout
 
 ```
-src/hazardserve/   hazard.py (survival)  cost.py (time/migration)  policy.py (the algorithm + baselines)  simulator.py
+src/hazardserve/   hazard.py (survival)  cost.py (time/migration)  crossover.py (transfer vs recompute)  policy.py (the algorithm + baselines)  simulator.py
 examples/          runnable experiments
+notebooks/         derive-trigger.ipynb — the Phase 0 derivation
 tests/             pytest
 docs/              GitHub Pages (MkDocs Material)
-paper/             paper skeleton + bib
+paper/             paper skeleton + bib + design note
 traces/            notes on public availability and workload traces
 PLAN.md            phases, milestones, pivot thresholds
 ```

@@ -12,6 +12,7 @@ $$
 
 - [The problem](problem.md): nodes, hazards, requests, state, objective
 - [The algorithm](algorithm.md): the cost function and the two decisions it drives
+- [Transfer vs recompute](crossover.md): when moving the KV cache beats rebuilding it
 - [Prior art and novelty](related-work.md): what exists, what is new
 - [Evaluation plan](evaluation.md): traces, baselines, metrics
 - [Roadmap](roadmap.md): phases and pivot thresholds

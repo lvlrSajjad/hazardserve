@@ -7,5 +7,7 @@ build/
 .pytest_cache/
 .ruff_cache/
 results/*.json
+paper/figures/*.png
+paper/figures/*.pdf
 docs/_site/
 .DS_Store
